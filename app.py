@@ -22,12 +22,18 @@ def pdftocairo():
     file = request.files['file']
     infile = tempfile.NamedTemporaryFile()
     file.save(infile.name)
-    outfile = str(uuid.uuid4())
-    os.mkdir(f'./media/{outfile}')
-    sp.run(['pdftocairo', '-png', infile.name, f'./media/{outfile}/output'], check=True)
-    return {
-        'images': [f'/media/{outfile}/{i}' for i in os.listdir(f'./media/{outfile}/')]
-    }
+    
+    outfile = tempfile.TemporaryDirectory()
+    sp.run(['pdftocairo', '-png', infile.name, f'{outfile.name}/output'], check=True)
+    
+    files = os.listdir(outfile.name)
+    
+    if len(files) == 1:
+        return send_file(f'{outfile.name}/{files[0]}', as_attachment=True)
+    else:
+        return {
+            'images': [send_file(f'{outfile.name}/{i}', as_attachment=True) for i in files]
+        }
 
 
 @app.route("/pdftoppm", methods=['POST'])
