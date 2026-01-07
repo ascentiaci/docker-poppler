@@ -1,0 +1,8 @@
+services:
+  poppler:
+    build: .
+    container_name: poppler_service
+    volumes:
+      - ./:/app
+    ports:
+      - "5555:5000"
